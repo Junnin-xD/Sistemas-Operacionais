@@ -1,128 +1,151 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Scanner;
+
+import javax.lang.model.util.ElementScanner14;
+import javax.naming.AuthenticationException;
 
 public class App {
 
-    static ArrayList<Processos> lista = new ArrayList<Processos>();
+    static LinkedList<Processos> lista = new LinkedList<Processos>();
+    static LinkedList<Processos> escalonamento = new LinkedList<Processos>();
+
     public static void main(String[] args) throws Exception {
-        
+
         Scanner input = new Scanner(System.in);
-        
-        
+
         System.out.println("Quantos processos tem?");
         int quantidade = input.nextInt();
         int index = 1;
 
-        do{
-            boolean interrupcao = false;
+        do {
 
-            System.out.println("Digite o tempo do processo:");
+            System.out.println("Digite o tempo do processo " + index);
             int tempo = input.nextInt();
 
-            System.out.println("O processo tem interrupção? (s) para sim (n) para não");
-            String opcao = input.next();
-            
-            if(opcao.equals("s")){
-                interrupcao = true;
-            } 
+            System.out.println("Qual momento da interrupção?");
+            int momentoInterrupcao = input.nextInt();
 
-            Processos P = new Processos(index, tempo, interrupcao);
+            System.out.println("Por quanto tempo o processo sera interrompido?");
+            int tempoInterrupcao = input.nextInt();
+
+            System.out.println("Qual a prioridade do processo?");
+            int prioridade = input.nextInt();
+
+            Processos P = new Processos(index, tempo, momentoInterrupcao, tempoInterrupcao, prioridade);
             lista.add(P);
 
             index++;
 
-        }while(index < quantidade + 1);
+        } while (index < quantidade + 1);
 
         System.out.println("Escolha 1 para FCFS" + "\n" +
-                            "Escolha 2 para SJF" + "\n" +
-                            "Escolha 3 para SRT" + "\n" +
-                            "Escolha 4 para DULING" + "\n" +
-                            "Escolha 5 para ROUND ROLIN" + "\n" +
-                            "Escolha 6 para PARA SAIR" + "\n");
-                            
-            int escolha = input.nextInt();
-        
-            switch(escolha){
-                case 1: 
+                "Escolha 2 para SJF" + "\n" +
+                "Escolha 3 para SRT" + "\n" +
+                "Escolha 4 para DULING" + "\n" +
+                "Escolha 5 para ROUND ROLIN" + "\n" +
+                "Escolha 6 para PARA SAIR" + "\n");
+
+        int escolha = input.nextInt();
+
+        switch (escolha) {
+            case 1:
                 fcfs(lista);
                 return;
 
-                case 2:
-                sjf(lista);
+            case 2:
+                // sjf(lista);
 
-                case 3:
-                //srt(lista);
+            case 3:
+                // srt(lista);
 
-                case 4:
-                //duling(lista);
+            case 4:
+                // duling(lista);
 
-                case 5:
-                //roundRolin(lista);
-                
-                case 6:
+            case 5:
+                // roundRolin(lista);
+
+            case 6:
                 break;
+        }
+    }
+
+    public static void fcfs(LinkedList<Processos> lista) throws InterruptedException {
+
+        int contador = 0;
+
+        for (int i = 0; i < lista.size(); i++) {
+
+            if (lista.get(i).getMomentoInterrupcao() != 0) {
+
+                System.out.println("Processo " + lista.get(i).getIndex() + " startado");
+
+                while (lista.get(i).getTempoProcesso() > lista.get(i).getMomentoInterrupcao()){
+
+                    lista.get(i).run();
+                    System.out.println("---");
+                    int aux = lista.get(i).getTempoProcesso();
+
+                    lista.get(i).setTempoProcesso(aux - 1);
+
+                    contador++;
+
+                }
+
+                System.out.println("Processo " + lista.get(i).getIndex() + " Interrompido");
+
+                escalonamento.add(lista.get(i));
+
+            } else {
+
+                System.out.println("Processo " + lista.get(i).getIndex() + " startado");
+
+                do {
+                    lista.get(i).run();
+                    System.out.println("---");
+                    int aux = lista.get(i).getTempoProcesso();
+
+                    lista.get(i).setTempoProcesso(aux - 1);
+
+                    contador++;
+
+                } while (lista.get(i).getTempoProcesso() != 0);
+
             }
 
-        /*for(Processos i: lista){
-            System.out.println(i);
-        }*/
-    }
+        }
 
-    public static void fcfs(ArrayList<Processos> lista) throws InterruptedException{
+        for (int j = 0; j < escalonamento.size(); j++) {                                                //FALHA SE INICIA AQUI
 
-        for(int i = 0; i < lista.size(); i++){
-            
-            System.out.println("Processo " + lista.get(i).getValor() + " startado");
-            Thread.sleep(lista.get(i).getTempoProcesso() * 1000);
-            System.out.println("Processo " + lista.get(i).getValor() + " finalizado");
-        
+            int contaTempo = escalonamento.get(j).getTempoInterrupcao();
+            escalonamento.get(j).setTempoInterrupcao(contaTempo - contador);
+
+            if (escalonamento.get(j).getTempoInterrupcao() > 0) {
+                System.out.println("Finalizando tempo de Interrupção do processo " + escalonamento.get(j).getIndex());
+                do {
+                    escalonamento.get(j).run();
+                    System.out.println("---");
+                    int aux = escalonamento.get(j).getTempoInterrupcao();
+
+                    escalonamento.get(j).setTempoInterrupcao(aux - 1);
+
+                } while (escalonamento.get(j).getTempoInterrupcao() == 0);
+
+            } else {                                                                                      //FALHA TERMINA AQUI
+
+                System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
+
+                do {
+                    escalonamento.get(j).run();
+                    System.out.println("---");
+                    int aux = escalonamento.get(j).getTempoProcesso();
+
+                    escalonamento.get(j).setTempoProcesso(aux - 1);
+
+                } while (escalonamento.get(j).getTempoProcesso() != 0);
+                System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado");
+            }
         }
     }
-
-    public static void sjf(ArrayList<Processos> lista) throws InterruptedException{
-
-        Collections.sort(lista);
-
-        for(int i = 0; i < lista.size(); i++){
-            
-            System.out.println("Processo " + lista.get(i).getValor() + " startado");
-            Thread.sleep(lista.get(i).getTempoProcesso() * 1000);
-            System.out.println("Processo " + lista.get(i).getValor() + " finalizado");
-        
-        }
-    }
-
-    /*public static void srt(ArrayList<Processos> lista) throws InterruptedException{
-
-        for(int i = 0; i < lista.size(); i++){
-            
-            System.out.println("Processo " + i + " startado");
-            Thread.sleep(lista.get(i).getTempoProcesso() * 1000);
-            System.out.println("Processo " + i + " finalizado");
-        
-        }
-    }
-
-    public static void duling(ArrayList<Processos> lista) throws InterruptedException{RoundRolin
-
-        for(int i = 0; i < lista.size(); i++){
-            
-            System.out.println("Processo " + i + " startado");
-            Thread.sleep(lista.get(i).getTempoProcesso() * 1000);
-            System.out.println("Processo " + i + " finalizado");
-        
-        }
-    }
-
-    public static void roundRolin(ArrayList<Processos> lista) throws InterruptedException{
-
-        for(int i = 0; i < lista.size(); i++){
-            
-            System.out.println("Processo " + i + " startado");
-            Thread.sleep(lista.get(i).getTempoProcesso() * 1000);
-            System.out.println("Processo " + i + " finalizado");
-        
-        }
-    }*/
 }
