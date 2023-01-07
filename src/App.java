@@ -9,6 +9,10 @@ import javax.naming.AuthenticationException;
 public class App {
 
     static LinkedList<Processos> lista = new LinkedList<Processos>();
+    static LinkedList<Processos> lista1 = new LinkedList<Processos>();
+    static LinkedList<Processos> lista2 = new LinkedList<Processos>();
+    static LinkedList<Processos> lista3 = new LinkedList<Processos>();
+    static LinkedList<Processos> lista4 = new LinkedList<Processos>();
     static LinkedList<Processos> escalonamento = new LinkedList<Processos>();
 
     public static void main(String[] args) throws Exception {
@@ -35,6 +39,10 @@ public class App {
 
             Processos P = new Processos(index, tempo, momentoInterrupcao, tempoInterrupcao, prioridade);
             lista.add(P);
+            lista1.add(P);
+            lista2.add(P);
+            lista3.add(P);
+            lista4.add(P);
 
             index++;
 
@@ -55,16 +63,16 @@ public class App {
                 return;
 
             case 2:
-                // sjf(lista);
+                sjf(lista1);
 
             case 3:
-                // srt(lista);
+                // srt(lista2);
 
             case 4:
-                // duling(lista);
+                // duling(lista3);
 
             case 5:
-                // roundRolin(lista);
+                // roundRolin(lista4);
 
             case 6:
                 break;
@@ -75,17 +83,19 @@ public class App {
 
         int contadorInterrupcao = 0;
 
-        for (int i = 0; i < lista.size(); i++) {                                                //Percorre vetor selecionando o processo
+        for (int i = 0; i < lista.size(); i++) { // Percorre vetor selecionando o processo
 
-            if (lista.get(i).getMomentoInterrupcao() != 0) {                                    //Verifica se o processo será interrompido
+            if (lista.get(i).getMomentoInterrupcao() != 0) { // Verifica se o processo será interrompido
 
                 System.out.println("Processo " + lista.get(i).getIndex() + " startado");
 
                 int contaTempoProcesso = 0;
 
-                while (contaTempoProcesso < lista.get(i).getMomentoInterrupcao()){              //looping até o tempo do processo chegar no momento da interrupção
+                while (contaTempoProcesso < lista.get(i).getMomentoInterrupcao()) { // looping até o tempo do processo
+                                                                                    // chegar no momento da interrupção
 
-                    if(escalonamento.size() > 0){                                               //Verifica se tem algum processo a espera na lista de escalonamento e executa o processo
+                    if (escalonamento.size() > 0) { // Verifica se tem algum processo a espera na lista de escalonamento
+                                                    // e executa o processo
                         lista.get(i).run();
                         System.out.println("---");
 
@@ -95,7 +105,7 @@ public class App {
 
                         contadorInterrupcao++;
                         contaTempoProcesso++;
-                    }else{                                                                      //Executa o processo com a fila de escalonamento vazia
+                    } else { // Executa o processo com a fila de escalonamento vazia
 
                         lista.get(i).run();
                         System.out.println("---");
@@ -113,20 +123,20 @@ public class App {
 
                 escalonamento.add(lista.get(i));
 
-            } else {                                                                            //Executa o processo quando não há interrupção
+            } else { // Executa o processo quando não há interrupção
 
                 System.out.println("Processo " + lista.get(i).getIndex() + " startado");
 
                 do {
-                    if(escalonamento.size() > 0){
+                    if (escalonamento.size() > 0) {
                         lista.get(i).run();
                         System.out.println("---");
                         int aux = lista.get(i).getTempoProcesso();
 
                         lista.get(i).setTempoProcesso(aux - 1);
-                        
-                        contadorInterrupcao++;   
-                    }                 
+
+                        contadorInterrupcao++;
+                    }
 
                 } while (lista.get(i).getTempoProcesso() != 0);
 
@@ -136,15 +146,16 @@ public class App {
 
         }
 
-        if(escalonamento.size() != 0){                                                                       //Verifica se tem processos na lista de escalonados
+        if (escalonamento.size() != 0) { // Verifica se tem processos na lista de escalonados
 
-            for (int j = 0; j < escalonamento.size(); j++) {                                                 //Percorre a lista pegando o index
+            for (int j = 0; j < escalonamento.size(); j++) { // Percorre a lista pegando o index
 
                 int contaTempo = escalonamento.get(j).getTempoInterrupcao();
                 escalonamento.get(j).setTempoInterrupcao(contaTempo - contadorInterrupcao);
 
-                if (escalonamento.get(j).getTempoInterrupcao() > 0) {                                                                       //Aguarda tempo de interrupção
-                    System.out.println("Finalizando tempo de Interrupção do processo " + escalonamento.get(j).getIndex());
+                if (escalonamento.get(j).getTempoInterrupcao() > 0) { // Aguarda tempo de interrupção
+                    System.out
+                            .println("Finalizando tempo de Interrupção do processo " + escalonamento.get(j).getIndex());
                     do {
                         escalonamento.get(j).run();
                         System.out.println("---");
@@ -154,11 +165,12 @@ public class App {
 
                     } while (escalonamento.get(j).getTempoInterrupcao() > 0);
 
-                    System.out.println("Tempo de interrupção do processo " + escalonamento.get(j).getIndex() + " finalizado");
+                    System.out.println(
+                            "Tempo de interrupção do processo " + escalonamento.get(j).getIndex() + " finalizado");
                     System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
 
-                    while(escalonamento.get(j).getTempoProcesso() > 0){
-                       
+                    while (escalonamento.get(j).getTempoProcesso() > 0) {
+
                         escalonamento.get(j).run();
                         System.out.println("---");
                         int aux = escalonamento.get(j).getTempoProcesso();
@@ -168,7 +180,7 @@ public class App {
 
                     System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado.");
 
-                } else {                                                                                      //FALHA TERMINA AQUI
+                } else { // FALHA TERMINA AQUI
 
                     System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
 
@@ -184,5 +196,128 @@ public class App {
                 }
             }
         }
+        escalonamento.clear();
+    }
+
+    public static void sjf(LinkedList<Processos> lista1) throws InterruptedException {
+    
+        int contadorInterrupcao = 0;
+
+        Collections.sort(lista1);
+
+        for (int i = 0; i < lista1.size(); i++) { // Percorre vetor selecionando o processo
+
+            if (lista1.get(i).getMomentoInterrupcao() != 0) { // Verifica se o processo será interrompido
+
+                System.out.println("Processo " + lista1.get(i).getIndex() + " startado");
+
+                int contaTempoProcesso = 0;
+
+                while (contaTempoProcesso < lista1.get(i).getMomentoInterrupcao()) { // looping até o tempo do processo
+                                                                                    // chegar no momento da interrupção
+
+                    if (escalonamento.size() > 0) { // Verifica se tem algum processo a espera na lista de escalonamento
+                                                    // e executa o processo
+                        lista1.get(i).run();
+                        System.out.println("---");
+
+                        int aux = lista1.get(i).getTempoProcesso();
+
+                        lista1.get(i).setTempoProcesso(aux - 1);
+
+                        contadorInterrupcao++;
+                        contaTempoProcesso++;
+                    } else { // Executa o processo com a fila de escalonamento vazia
+
+                        lista1.get(i).run();
+                        System.out.println("---");
+
+                        int aux = lista1.get(i).getTempoProcesso();
+
+                        lista1.get(i).setTempoProcesso(aux - 1);
+
+                        contaTempoProcesso++;
+
+                    }
+                }
+
+                System.out.println("Processo " + lista1.get(i).getIndex() + " Interrompido");
+
+                escalonamento.add(lista1.get(i));
+
+            } else { // Executa o processo quando não há interrupção
+
+                System.out.println("Processo " + lista1.get(i).getIndex() + " startado");
+
+                do {
+                    if (escalonamento.size() > 0) {
+                        lista1.get(i).run();
+                        System.out.println("---");
+                        int aux = lista1.get(i).getTempoProcesso();
+
+                        lista1.get(i).setTempoProcesso(aux - 1);
+
+                        contadorInterrupcao++;
+                    }
+
+                } while (lista1.get(i).getTempoProcesso() != 0);
+
+                System.out.println("Processo " + lista1.get(i).getIndex() + " finalizado");
+
+            }
+
+        }
+
+        if (escalonamento.size() != 0) { // Verifica se tem processos na lista de escalonados
+
+            for (int j = 0; j < escalonamento.size(); j++) { // Percorre a lista pegando o index
+
+                int contaTempo = escalonamento.get(j).getTempoInterrupcao();
+                escalonamento.get(j).setTempoInterrupcao(contaTempo - contadorInterrupcao);
+
+                if (escalonamento.get(j).getTempoInterrupcao() > 0) { // Aguarda tempo de interrupção
+                    System.out
+                            .println("Finalizando tempo de Interrupção do processo " + escalonamento.get(j).getIndex());
+                    do {
+                        escalonamento.get(j).run();
+                        System.out.println("---");
+                        int aux = escalonamento.get(j).getTempoInterrupcao();
+
+                        escalonamento.get(j).setTempoInterrupcao(aux - 1);
+
+                    } while (escalonamento.get(j).getTempoInterrupcao() > 0);
+
+                    System.out.println(
+                            "Tempo de interrupção do processo " + escalonamento.get(j).getIndex() + " finalizado");
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
+
+                    while (escalonamento.get(j).getTempoProcesso() > 0) {
+
+                        escalonamento.get(j).run();
+                        System.out.println("---");
+                        int aux = escalonamento.get(j).getTempoProcesso();
+
+                        escalonamento.get(j).setTempoProcesso(aux - 1);
+                    }
+
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado.");
+
+                } else { // FALHA TERMINA AQUI
+
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
+
+                    do {
+                        escalonamento.get(j).run();
+                        System.out.println("---");
+                        int aux = escalonamento.get(j).getTempoProcesso();
+
+                        escalonamento.get(j).setTempoProcesso(aux - 1);
+
+                    } while (escalonamento.get(j).getTempoProcesso() != 0);
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado");
+                }
+            }
+        }
+        escalonamento.clear();
     }
 }
