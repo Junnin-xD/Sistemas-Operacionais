@@ -73,78 +73,115 @@ public class App {
 
     public static void fcfs(LinkedList<Processos> lista) throws InterruptedException {
 
-        int contador = 0;
+        int contadorInterrupcao = 0;
 
-        for (int i = 0; i < lista.size(); i++) {
+        for (int i = 0; i < lista.size(); i++) {                                                //Percorre vetor selecionando o processo
 
-            if (lista.get(i).getMomentoInterrupcao() != 0) {
+            if (lista.get(i).getMomentoInterrupcao() != 0) {                                    //Verifica se o processo será interrompido
 
                 System.out.println("Processo " + lista.get(i).getIndex() + " startado");
 
-                while (lista.get(i).getTempoProcesso() > lista.get(i).getMomentoInterrupcao()){
+                int contaTempoProcesso = 0;
 
-                    lista.get(i).run();
-                    System.out.println("---");
-                    int aux = lista.get(i).getTempoProcesso();
+                while (contaTempoProcesso < lista.get(i).getMomentoInterrupcao()){              //looping até o tempo do processo chegar no momento da interrupção
 
-                    lista.get(i).setTempoProcesso(aux - 1);
+                    if(escalonamento.size() > 0){                                               //Verifica se tem algum processo a espera na lista de escalonamento e executa o processo
+                        lista.get(i).run();
+                        System.out.println("---");
 
-                    contador++;
+                        int aux = lista.get(i).getTempoProcesso();
 
+                        lista.get(i).setTempoProcesso(aux - 1);
+
+                        contadorInterrupcao++;
+                        contaTempoProcesso++;
+                    }else{                                                                      //Executa o processo com a fila de escalonamento vazia
+
+                        lista.get(i).run();
+                        System.out.println("---");
+
+                        int aux = lista.get(i).getTempoProcesso();
+
+                        lista.get(i).setTempoProcesso(aux - 1);
+
+                        contaTempoProcesso++;
+
+                    }
                 }
 
                 System.out.println("Processo " + lista.get(i).getIndex() + " Interrompido");
 
                 escalonamento.add(lista.get(i));
 
-            } else {
+            } else {                                                                            //Executa o processo quando não há interrupção
 
                 System.out.println("Processo " + lista.get(i).getIndex() + " startado");
 
                 do {
-                    lista.get(i).run();
-                    System.out.println("---");
-                    int aux = lista.get(i).getTempoProcesso();
+                    if(escalonamento.size() > 0){
+                        lista.get(i).run();
+                        System.out.println("---");
+                        int aux = lista.get(i).getTempoProcesso();
 
-                    lista.get(i).setTempoProcesso(aux - 1);
-
-                    contador++;
+                        lista.get(i).setTempoProcesso(aux - 1);
+                        
+                        contadorInterrupcao++;   
+                    }                 
 
                 } while (lista.get(i).getTempoProcesso() != 0);
+
+                System.out.println("Processo " + lista.get(i).getIndex() + " finalizado");
 
             }
 
         }
 
-        for (int j = 0; j < escalonamento.size(); j++) {                                                //FALHA SE INICIA AQUI
+        if(escalonamento.size() != 0){                                                                       //Verifica se tem processos na lista de escalonados
 
-            int contaTempo = escalonamento.get(j).getTempoInterrupcao();
-            escalonamento.get(j).setTempoInterrupcao(contaTempo - contador);
+            for (int j = 0; j < escalonamento.size(); j++) {                                                 //Percorre a lista pegando o index
 
-            if (escalonamento.get(j).getTempoInterrupcao() > 0) {
-                System.out.println("Finalizando tempo de Interrupção do processo " + escalonamento.get(j).getIndex());
-                do {
-                    escalonamento.get(j).run();
-                    System.out.println("---");
-                    int aux = escalonamento.get(j).getTempoInterrupcao();
+                int contaTempo = escalonamento.get(j).getTempoInterrupcao();
+                escalonamento.get(j).setTempoInterrupcao(contaTempo - contadorInterrupcao);
 
-                    escalonamento.get(j).setTempoInterrupcao(aux - 1);
+                if (escalonamento.get(j).getTempoInterrupcao() > 0) {                                                                       //Aguarda tempo de interrupção
+                    System.out.println("Finalizando tempo de Interrupção do processo " + escalonamento.get(j).getIndex());
+                    do {
+                        escalonamento.get(j).run();
+                        System.out.println("---");
+                        int aux = escalonamento.get(j).getTempoInterrupcao();
 
-                } while (escalonamento.get(j).getTempoInterrupcao() == 0);
+                        escalonamento.get(j).setTempoInterrupcao(aux - 1);
 
-            } else {                                                                                      //FALHA TERMINA AQUI
+                    } while (escalonamento.get(j).getTempoInterrupcao() > 0);
 
-                System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
+                    System.out.println("Tempo de interrupção do processo " + escalonamento.get(j).getIndex() + " finalizado");
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
 
-                do {
-                    escalonamento.get(j).run();
-                    System.out.println("---");
-                    int aux = escalonamento.get(j).getTempoProcesso();
+                    while(escalonamento.get(j).getTempoProcesso() > 0){
+                       
+                        escalonamento.get(j).run();
+                        System.out.println("---");
+                        int aux = escalonamento.get(j).getTempoProcesso();
 
-                    escalonamento.get(j).setTempoProcesso(aux - 1);
+                        escalonamento.get(j).setTempoProcesso(aux - 1);
+                    }
 
-                } while (escalonamento.get(j).getTempoProcesso() != 0);
-                System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado");
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado.");
+
+                } else {                                                                                      //FALHA TERMINA AQUI
+
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " startado");
+
+                    do {
+                        escalonamento.get(j).run();
+                        System.out.println("---");
+                        int aux = escalonamento.get(j).getTempoProcesso();
+
+                        escalonamento.get(j).setTempoProcesso(aux - 1);
+
+                    } while (escalonamento.get(j).getTempoProcesso() != 0);
+                    System.out.println("Processo " + escalonamento.get(j).getIndex() + " finalizado");
+                }
             }
         }
     }
