@@ -1,19 +1,25 @@
-public class Processos implements Comparable<Processos>, Runnable {
+public class Processos implements Comparable<Processos>, Cloneable{
 
     private int index;
     private int tempoProcesso;
     private int tempoInterrupcao;
     private int momentoInterrupcao;
     private int prioridade;
+    private Long tempoPercorrido;
 
-    public Processos(int index, int tempo, int momentoInterrupcao, int tempoInterrupcao, int prioridade) {
+    public Processos(int index, int tempo, int momentoInterrupcao, int tempoInterrupcao, int prioridade, long tempoPercorrido) {
         this.setIndex(index);
         this.setTempoProcesso(tempo);
         this.setTempoInterrupcao(tempoInterrupcao);
         this.setMomentoInterrupcao(momentoInterrupcao);
         this.setPrioridade(prioridade);
-        Thread t = new Thread(this);
+        this.setTempoPercorrido(tempoPercorrido);
     }
+    
+
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+     }
 
     public int getTempoInterrupcao() {
         return tempoInterrupcao;
@@ -57,6 +63,7 @@ public class Processos implements Comparable<Processos>, Runnable {
 
     @Override
     public int compareTo(Processos o) {
+        
         return (this.tempoProcesso - o.getTempoProcesso());
     }
 
@@ -65,17 +72,13 @@ public class Processos implements Comparable<Processos>, Runnable {
         return "Processos [tempoProcesso=" + tempoProcesso + ", momentoInterrupcao=" + momentoInterrupcao + "]";
     }
 
-    @Override
-    public void run() {                                                 
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+    public Long getTempoPercorrido() {
+        return tempoPercorrido;
     }
 
 
+    public void setTempoPercorrido(Long tempoPercorrido) {
+        this.tempoPercorrido = tempoPercorrido;
+    }
 }
